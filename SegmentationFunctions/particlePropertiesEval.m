@@ -1,4 +1,4 @@
-function [Eval,T_prop,RGB,Mlines] = particlePropertiesEval(map,Class,pxsz,Convexthresh,PSep,Image)
+function [Eval,T_prop,RGB,Mlines] = particlePropertiesEval(map,Class,pxsz,Convexthresh,PSep,Image,minmarker,removecount)
 % Function to give out particle properties for a HRTEM image segmentation 
 % 
 % INPUTS:
@@ -40,9 +40,9 @@ function [Eval,T_prop,RGB,Mlines] = particlePropertiesEval(map,Class,pxsz,Convex
     M1=ismember(map,Class);
 
     % remove all areas with an equivalence diameter of 0.5 nm
-    removecount = 0.5/pxsz;
+    removecount = removecount/pxsz;
     removecount = double(ceil(pi/4*(removecount)^2));
-    minmarker = 0.5/pxsz;
+    minmarker = minmarker/pxsz;
     minmarker = double(ceil(pi/4*(minmarker)^2));
     M1 = bwareaopen(M1,removecount);
 

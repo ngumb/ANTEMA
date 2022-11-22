@@ -29,6 +29,8 @@ netname = 'NP-net-weights.mat';
 Convexthresh = 0.95;    % threshold for particle separation based on convexity
 PSep = true;            % Particle separation enabled (true) or disabled (false)
 saveas = 'xlsx';        % set to 'csv' or 'xlsx'
+removecount = 0.5;      % minimum particle size in nm
+minmarker = 0.5;        % minimum marker size for particle separtion routine in nm
 % Colormap for the raw segmentation map
 cmap = [
          0 114 189      % Background
