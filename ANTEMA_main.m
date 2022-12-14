@@ -3,7 +3,8 @@
 % micrograph analyzer (ANTEMA)
 
 
-% Copyright (C) 2022  University of Duisburg-Essen
+% Copyright (C) 2022  University of Duisburg-Essen, 
+%                       Nina Gumbiowski
 % 
 %     This program is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
@@ -91,12 +92,12 @@ for i=1:length(filename)
     C =uint8(C);
     
     % Show image
-    figure
-    CB=labeloverlay(Image,C);
-    imshowpair(Image,CB,'montage')
- 
+%     figure
+%     CB=labeloverlay(Image,C);
+%     imshowpair(Image,CB,'montage')
+%  
     %% get properties
-    [Eval,partProp,B,Mlines] = particlePropertiesEval(C,2,pxsz,Convexthresh,PSep,Image);
+    [Eval,partProp,B,Mlines] = particlePropertiesEval(C,2,pxsz,Convexthresh,PSep,Image,minmarker,removecount);
 
     if isempty(partProp)
         warning('Property measurement is empty\n No data generated\n')
