@@ -2,9 +2,11 @@
 
 Automated Nanoparticle Transmission Electron Micrograph Analysis
 
-This program is designed to automatically analyze high resolution transmission electron microscopic images (.dm3 files) of nanoparticles for shape and size related parameters. To run this program just run the main script. Necessary inputs will be requested in the command window.
+This program is designed to automatically analyze high resolution transmission electron microscopic images (.dm3 files) of nanoparticles for shape and size related parameters by using a neural network for image segmentation. 
+This program can be run in MATLAB by running ANTEMA_Main.m. Necessary inputs will be requested in the command window.
+Or you can install a version with a graphical user interface as a MATLAB app.
 
-A graphical user interface as well as test images will be added soon.
+You can test the program on the dm3 files in the testimages folder.
 
 MATLAB Version R2021b
 Required Toolboxes:
