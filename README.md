@@ -14,4 +14,6 @@ Required Toolboxes:
 - Image Processing Toolbox
 - Computer Vision Toolbox
 
+More detailed explanations can be found in the corresponding paper DOI: 10.1039/d2na00781a
+
 For further information contact: nina.gumbiowski@uni-due.de
