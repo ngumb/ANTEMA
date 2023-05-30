@@ -109,7 +109,9 @@ for i=1:length(filename)
 %     imshowpair(Image,CB,'montage')
 %  
     %% get properties
-    [Eval,partProp,B,Mlines] = particlePropertiesEval(C,2,pxsz,Convexthresh,PSep,Image,minmarker,removecount);
+    [Eval,partProp,B,Mlines] = particlePropertiesEval(C,2,pxsz,Image,...
+        'Convexthresh',Convexthresh,'PSep',PSep,'minmarker',minmarker,...
+        'removecount',removecount);
 
     if isempty(partProp)
         warning('Property measurement is empty\n No data generated\n')
