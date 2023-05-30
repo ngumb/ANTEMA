@@ -66,6 +66,18 @@ end
 %% start timer for performance evaluation
 tic
 
+%% Otion to save elsewhere
+store = input('Where should the results be stored?\n 1: Results folder (default)\n 2: Directory of the origin data\n 3: Other \n');
+if store == 1
+    resfolder = 'Results';
+elseif store == 2
+    resfolder = pathdir;
+elseif store == 3
+    resfolder = uigetdir();
+else
+    fprintf('ERROR: Irregular input \n')
+    return
+end
 %% Processing images
 for i=1:length(filename)
     close all
@@ -114,32 +126,33 @@ for i=1:length(filename)
 
     %% Save Results
     % make directory for results
-    mkdir('Results',expName) 
+    mkdir(resfolder,expName) 
     
     % save overlay image and raw image     
-    imwrite(B,['Results\' expName '\ImageOverlay.png'])
-    imwrite(B2,['Results\' expName '\ImageOverlayRaw_' expName '.png'])
-    imwrite(Image,['Results\' expName '\Image_' expName '.png'])
+    imwrite(B,[resfolder '\' expName '\' expName '_ImageOverlay.png'])
+    imwrite(B2,[resfolder '\' expName '\' expName '_ImageOverlayRaw.png'])
+    imwrite(Image,[resfolder '\' expName '\' expName '_Image.png'])
+
     if PSep == true
         Mlines = imdilate(Mlines,strel('square',3));
          Mlines=labeloverlay(Image,Mlines,'Colormap',[1,1,1]);
-        imwrite(Mlines,['Results\' expName '\ImageOverlayLines.png'])
+        imwrite(Mlines,[resfolder '\' expName '\' expName 'ImageOverlayLines.png'])
     end
 
     % save results as Matlab file
-    save(['Results\' expName '\EvalData_' expName '.mat'],'Eval','partProp','C','pxsz')
+    save([resfolder '\' expName '\EvalData_' expName '.mat'],'Eval','partProp','C','pxsz')
 
     if saveas == 'xlsx'
         % Write to Excel file
-        writetable(partProp,['Results\' expName '\EvalData_' expName '.xlsx'])
-        xlswrite(['Results\' expName '\EvalData_' expName '.xlsx'],Eval,'MeanValues','B2')
-        xlswrite(['Results\' expName '\EvalData_' expName '.xlsx'],{'mean Value','standard deviation'},'MeanValues','B1')
+        writetable(partProp,[resfolder '\' expName '\EvalData_' expName '.xlsx'])
+        xlswrite([resfolder '\' expName '\EvalData_' expName '.xlsx'],Eval,'MeanValues','B2')
+        xlswrite([resfolder '\' expName '\EvalData_' expName '.xlsx'],{'mean Value','standard deviation'},'MeanValues','B1')
         rows={'Area [nm^2]'; 'Equivalent Diameter [nm]';...
             'min. Feret Diameter [nm]'; 'max. Feret Diameter [nm]';'Circularity [-]'};
-        xlswrite(['Results\' expName '\EvalData_' expName '.xlsx'],rows,'MeanValues','A2')
+        xlswrite([resfolder '\' expName '\EvalData_' expName '.xlsx'],rows,'MeanValues','A2')
         tend=toc
     elseif saveas =='csv'
-        writetable(partProp,['Results\' expName '\EvalData_' expName '.csv'])
+        writetable(partProp,[resfolder '\' expName '\EvalData_' expName '.csv'])
     end
 
 if batch == 1  && allinone > 0
@@ -148,5 +161,5 @@ end
 end
 
 if batch == 1 && allinone > 0
-    writetable(AllpartProp,['Results\' expName '_all_Images_Results.xlsx'])
+    writetable(AllpartProp,[resfolder '\' expName '_all_Images_Results.xlsx'])
 end
