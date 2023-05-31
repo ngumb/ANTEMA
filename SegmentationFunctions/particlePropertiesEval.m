@@ -61,7 +61,7 @@ Convexthresh = p.Results.Convexthresh;
 PSep = p.Results.PSep;
 minmarker = p.Results.minmarker;
 removecount = p.Results.removecount;
-Convexthresh_min = p.Results.Convextresh_min;
+Convexthresh_min = p.Results.Convexthresh_min;
 
     %get binary map for single Particle Class
     M1=ismember(map,Class);
