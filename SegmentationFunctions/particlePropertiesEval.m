@@ -17,6 +17,8 @@ function [Eval,T_prop,RGB,Mlines] = particlePropertiesEval(map,Class,pxsz,Image,
 %   Convexthresh_min: minimum Convexity needed to feed into separation
 %                     routine, particles will be discarded if below,
 %                     default 0.5
+%   Mode : Mode for particle separation. Can either be 'UECS' or 'wateshed'
+%           Default: UECS
 % OUTPUTS:
 %   Eval: Eval=[p_Area_mean, p_Area_StD;...
 %        p_LFmin_mean, p_LFmin_StD;...
@@ -48,6 +50,9 @@ PSep = true;
 minmarker = 0.5;
 removecount = 0.5;
 Convexthresh_min = 0.5;
+defaultMode = 'UECS';
+expectedModes = {'UECS','Watershed'};
+
 
 p = inputParser;
 addParameter(p,'Convexthresh',Convexthresh,@(x) isnumeric(x)&& (x<=1)&&(x>=0));
@@ -55,6 +60,7 @@ addParameter(p,'PSep', PSep, @islogical);
 addParameter(p,'minmarker',minmarker, @isnumeric);
 addParameter(p,'removecount',removecount, @isnumeric);
 addParameter(p,'Convexthresh_min',Convexthresh_min,@(x) isnumeric(x)&& (x<=1)&&(x>=0));
+addParameter(p,'Mode',defaultMode,@(x) any(validatestring(x,expectedModes)));
 parse(p,varargin{:})
 
 Convexthresh = p.Results.Convexthresh;
@@ -62,6 +68,7 @@ PSep = p.Results.PSep;
 minmarker = p.Results.minmarker;
 removecount = p.Results.removecount;
 Convexthresh_min = p.Results.Convexthresh_min;
+Mode = p.Results.Mode;
 
     %get binary map for single Particle Class
     M1=ismember(map,Class);
@@ -107,16 +114,25 @@ Convexthresh_min = p.Results.Convexthresh_min;
                 if stats(ii).EulerNumber <= -10
                     warning('Too many holes. Particle will be removed from evaluation \n')
                 end
-                [SepParticles,~] = ParticleSeparation(MnonConv,minmarker,Convexthresh);
-
-                for bi = 1:length(SepParticles)
-                    if ~isempty(SepParticles{bi})
-                        Msplit = zeros(size(M1,1),size(M1,2));
-                        Msplit(BBcurr(2):BBcurr(2)+BBcurr(4)-1,BBcurr(1):BBcurr(1)+BBcurr(3)-1) = SepParticles{bi};
-                        Mresolved(:,:,end+1) = Msplit;
-                        B = bwperim(Msplit,8);
-                        Mlines(B) = 1; 
+                if strcmp(Mode,'UECS') == true
+                    [SepParticles,~] = ParticleSeparation(MnonConv,minmarker,Convexthresh);
+    
+                    for bi = 1:length(SepParticles)
+                        if ~isempty(SepParticles{bi})
+                            Msplit = zeros(size(M1,1),size(M1,2));
+                            Msplit(BBcurr(2):BBcurr(2)+BBcurr(4)-1,BBcurr(1):BBcurr(1)+BBcurr(3)-1) = SepParticles{bi};
+                            Mresolved(:,:,end+1) = Msplit;
+                            B = bwperim(Msplit,8);
+                            Mlines(B) = 1; 
+                        end
                     end
+                elseif strcmp(Mode,'Watershed') == true
+                    SepParticles = ParticleSeparationWatershed(MnonConv,Convexthresh);
+                    Mresolved(BBcurr(2):BBcurr(2)+BBcurr(4)-1,BBcurr(1):BBcurr(1)+BBcurr(3)-1,1) =...
+                    Mresolved(BBcurr(2):BBcurr(2)+BBcurr(4)-1,BBcurr(1):BBcurr(1)+BBcurr(3)-1,1)+SepParticles;
+                    % OVERRIDE PARTICLES WITH SEPARATED TO SAVE MEMORY
+                else
+                    error('Input for mode is not a valid input. Mode can be UECS oder Watershed \n')
                 end
             elseif Convex(ii) < Convexthresh_min %QUALITY CONTROL
                 MnonConv = Mstack{ii};
@@ -196,7 +212,10 @@ Convexthresh_min = p.Results.Convexthresh_min;
     p_LFmax=P_LFmax.*pxsz;
     p_LFmax_mean=mean(p_LFmax);
     p_LFmax_StD=std(p_LFmax);
-    
+
+     %% Aspect Ratio
+    AspR = p_LFmax./p_LFmin;
+
     %% Circularity
     p_circ=partProp.('Circularity');
     p_circ_mean=mean(p_circ);
@@ -229,14 +248,14 @@ Convexthresh_min = p.Results.Convexthresh_min;
     
     %Create Table
     if PSep == true
-        T_prop=table(p_Area, p_Dequ, p_LFmin, p_LFmax, p_circ,Perim,BB,Sep,Centroid);
+        T_prop=table(p_Area, p_Dequ, p_LFmin, p_LFmax, AspR, p_circ,Perim,BB,Sep,Centroid);
         T_prop.Properties.VariableNames = {'Area [nm^2]', 'Equivalent Diameter [nm]',...
-            'min. Feret Diameter [nm]', 'max. Feret Diameter [nm]','Circularity [-]',...
+            'min. Feret Diameter [nm]', 'max. Feret Diameter [nm]','Aspect Ratio (max/min)','Circularity [-]',...
             'Perimeter [nm]','Bounding Box parameters (xmin,ymin,xwidth,ywidth) [pixel]','Separation used (1 = true)','Centroid position [nm]'};
     else
-        T_prop=table(p_Area, p_Dequ, p_LFmin, p_LFmax, p_circ,Perim,BB,Convex,NonConv,Centroid);
+        T_prop=table(p_Area, p_Dequ, p_LFmin, p_LFmax, AspR, p_circ,Perim,BB,Convex,NonConv,Centroid);
         T_prop.Properties.VariableNames = {'Area [nm^2]', 'Equivalent Diameter [nm]',...
-            'min. Feret Diameter [nm]', 'max. Feret Diameter [nm]','Circularity [-]',...
+            'min. Feret Diameter [nm]', 'max. Feret Diameter [nm]','Aspect Ratio (max/min)','Circularity [-]',...
             'Perimeter [nm]','Bounding Box parameters (xmin,ymin,xwidth,ywidth) [pixel]','Convexity [-]','Convexity below threshold (1 = true)','Centroid position [nm]'};
     end
    

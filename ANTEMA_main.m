@@ -44,14 +44,19 @@ load(netname, 'net')
 %% Initialize as batch or single file
 batch=input('Segment Batch or single file?\n Press:\n 0 : single file\n 1 : batch\n');
 if batch==0 % single file option
-    fprintf('Choose dm3 file to be segmented \n')
-    [baseName, pathdir] = uigetfile('*.dm3');
+    fprintf('Choose dm3 or tif file to be segmented \n')
+    [baseName, pathdir] = uigetfile({'*.dm3;*.tif'});
     filename = {fullfile(pathdir, baseName)};
        
 elseif batch==1 % batch option for all images in one folder
-    fprintf('Choose folder that contains all .dm3 files to be segmented \n')
+    fprintf('Choose folder that contains all .dm3 or .tif files to be segmented \n')
     pathdir=uigetdir();
-    [stat,scan]=fileattrib([pathdir '\*.dm3']);
+    fileformat = input('What file format is your data in? \nPress: \n1) .tif \n2) .dm3 \n');
+    if fileformat == 1
+        [stat,scan]=fileattrib([pathdir '\*.tif']);
+    else 
+        [stat,scan]=fileattrib([pathdir '\*.dm3']);
+    end
     filename={scan.Name};
     fprintf('%d files found in specified folder\n',length(scan)) 
     allinone = input('How should the data be saved?\n 0: one file for each image\n 1: all image data in one file\n 2: both\n'); %%IMPLEMENT SAVING OPTION AT THE END
@@ -81,17 +86,43 @@ end
 %% Processing images
 for i=1:length(filename)
     close all
-    % load singular dm3 file 
+    % load singular dm3 file / tif file
     filepath=filename{i};
-    [pathstr,expName,ext] = fileparts(filepath); 
-    [Image,pxsz,units]=ReadDMFile(filepath);
-    if isempty(units)
-        warning('Unit of dm3 file is empty, Skip evaluation of %s\n',filepath)
-        continue
-    elseif units~='nm'
-        warning('Unit not in nm, Case currently not implemented\n Skip evaluation of %s\n',filepath)
-        continue
+    [pathstr,expName,ext] = fileparts(filepath);
+    if ext == '.dm3'
+        [Image,pxsz,units]=ReadDMFile(filepath);
+        if isempty(units)
+            warning('Unit of dm3 file is empty, Skip evaluation of %s\n',filepath)
+            continue
+         elseif units~='nm'
+            warning('Unit not in nm, Case currently not implemented\n Skip evaluation of %s\n',filepath)
+            continue
+        end
+    elseif ext == '.tif'
+        ImageTiff = Tiff(filepath);
+        pxsz = getTag(ImageTiff,'XResolution'); 
+        Image = imread(filepath);
+        units = getTag(ImageTiff,'ResolutionUnit');
+        if isempty(units)
+            warning('Unit of dm3 file is empty, Skip evaluation of %s\n',filepath)
+            continue
+        elseif units == 2
+            %Unit is in dpi (inches) --> scale to nm/px
+            pxsz = pxsz *2.54*10^(-7);
+            pxsz = 1/pxsz; %nm/px
+            units = 'nm';
+            
+        elseif units == 3 %px/cm
+            %Unit is in cm --> scale to nm
+            pxsz = pxsz *10^(-7);
+            pxsz = 1/pxsz; %nm/px
+            units = 'nm';
+        else
+            warning('Something is wrong with the unit\n')
+        end
     end
+
+    
     % apply filter
     Image=imgaussfilt(Image,2);
     % convert to uint8
