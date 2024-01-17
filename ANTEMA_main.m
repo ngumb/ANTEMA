@@ -32,6 +32,8 @@ PSep = true;            % Particle separation enabled (true) or disabled (false)
 saveas = 'xlsx';        % set to 'csv' or 'xlsx'
 removecount = 0.5;      % minimum particle size in nm
 minmarker = 0.5;        % minimum marker size for particle separtion routine in nm
+Mode = 'UECS';          % Mode : Mode for particle separation. Can either be 'UECS' or 'Watershed'
+                        %           Default: UECS
 % Colormap for the raw segmentation map
 cmap = [
          0 114 189      % Background
@@ -89,7 +91,7 @@ for i=1:length(filename)
     % load singular dm3 file / tif file
     filepath=filename{i};
     [pathstr,expName,ext] = fileparts(filepath);
-    if ext == '.dm3'
+    if strcmp(ext,'.dm3')==true
         [Image,pxsz,units]=ReadDMFile(filepath);
         if isempty(units)
             warning('Unit of dm3 file is empty, Skip evaluation of %s\n',filepath)
@@ -98,7 +100,7 @@ for i=1:length(filename)
             warning('Unit not in nm, Case currently not implemented\n Skip evaluation of %s\n',filepath)
             continue
         end
-    elseif ext == '.tif'
+    elseif strcmp(ext,'.tif')==true
         ImageTiff = Tiff(filepath);
         pxsz = getTag(ImageTiff,'XResolution'); 
         Image = imread(filepath);
@@ -142,7 +144,7 @@ for i=1:length(filename)
     %% get properties
     [Eval,partProp,B,Mlines] = particlePropertiesEval(C,2,pxsz,Image,...
         'Convexthresh',Convexthresh,'PSep',PSep,'minmarker',minmarker,...
-        'removecount',removecount);
+        'removecount',removecount, 'Mode', Mode);
 
     if isempty(partProp)
         warning('Property measurement is empty\n No data generated\n')
@@ -175,7 +177,7 @@ for i=1:length(filename)
     % save results as Matlab file
     save([resfolder '\' expName '\EvalData_' expName '.mat'],'Eval','partProp','C','pxsz')
 
-    if saveas == 'xlsx'
+    if strcmp(saveas,'xlsx')==true
         % Write to Excel file
         writetable(partProp,[resfolder '\' expName '\EvalData_' expName '.xlsx'])
         xlswrite([resfolder '\' expName '\EvalData_' expName '.xlsx'],Eval,'MeanValues','B2')
@@ -184,7 +186,7 @@ for i=1:length(filename)
             'min. Feret Diameter [nm]'; 'max. Feret Diameter [nm]';'Circularity [-]'};
         xlswrite([resfolder '\' expName '\EvalData_' expName '.xlsx'],rows,'MeanValues','A2')
         tend=toc
-    elseif saveas =='csv'
+    elseif strcmp(saveas,'csv')==true
         writetable(partProp,[resfolder '\' expName '\EvalData_' expName '.csv'])
     end
 

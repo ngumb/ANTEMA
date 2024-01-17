@@ -19,8 +19,9 @@ function [Image] = scalebar(I,pxsz,unit)
 
 % check if unit is in nm
 if unit ~= 'nm'
-    error('unit of pixel scale not in nm, Case currently not implemented\n')
-end
+    warning('unit of pixel scale not in nm, Case currently not implemented\n')
+    Image=I;
+else
 
 % Transfer image to uint8 if not already uint8
 I = im2uint8(I);
@@ -87,5 +88,6 @@ Image = insertText(I,[ypos,xpos],text_str,'FontSize',FS,...
     'TextColor','white','BoxOpacity',0,'AnchorPoint','CenterBottom',...
     'Font','Arial Black');
 
+end
 end
 
