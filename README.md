@@ -13,6 +13,7 @@ Required Toolboxes:
 - Deep Learning Toolbox
 - Image Processing Toolbox
 - Computer Vision Toolbox
+- Statistics and Machine Learning Toolbox
 
 More detailed explanations can be found in the corresponding paper: N. Gumbiowski, K. Loza, M. Heggen, M. Epple, Nanoscale advances 2023, 2318 – 2326, DOI: 10.1039/d2na00781a
 
