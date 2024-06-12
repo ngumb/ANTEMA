@@ -17,7 +17,7 @@ function [Eval,T_prop,RGB,Mlines] = particlePropertiesEval(map,Class,pxsz,Image,
 %   Convexthresh_min: minimum Convexity needed to feed into separation
 %                     routine, particles will be discarded if below,
 %                     default 0.5
-%   Mode : Mode for particle separation. Can either be 'UECS' or 'wateshed'
+%   Mode : Mode for particle separation. Can either be 'UECS' or 'Watershed'
 %           Default: UECS
 % OUTPUTS:
 %   Eval: Eval=[p_Area_mean, p_Area_StD;...
@@ -113,6 +113,7 @@ Mode = p.Results.Mode;
                     ~(Msplit==MnonConv);
                 if stats(ii).EulerNumber <= -10
                     warning('Too many holes. Particle will be removed from evaluation \n')
+                    continue
                 end
                 if strcmp(Mode,'UECS') == true
                     [SepParticles,~] = ParticleSeparation(MnonConv,minmarker,Convexthresh);
