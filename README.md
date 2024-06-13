@@ -24,5 +24,6 @@ Since then the program has been updated in the following ways:
 - a lower boundary for the convexity was implemented as well as a maximum number of holes a particle area is allowed to have, so that particles with too much overlap are excluded from evaluation and not fed into the separation routine
 - tif images can now also be used as an input
 - the option of using watershed instead of UECS for separation was implemented which can be useful for certain types of images
+- a python version of the trained network has been uploaded
 
 For further information contact: nina.gumbiowski@uni-due.de
