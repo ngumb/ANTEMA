@@ -25,5 +25,6 @@ Since then the program has been updated in the following ways:
 - tif images can now also be used as an input
 - the option of using watershed instead of UECS for separation was implemented which can be useful for certain types of images
 - a python version of the trained network has been uploaded
+- a python script for the segmentation has been added (this python script is still very much incomplete, the only part that is working and fully implemented is the preprocessing of the image and the subsequent segmentation using the model, all post processing steps have not been implemented yet)
 
-For further information contact: nina.gumbiowski@uni-due.de
+For further information contact: matthias.epple@uni-due.de
